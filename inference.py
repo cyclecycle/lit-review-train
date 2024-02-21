@@ -5,7 +5,7 @@ import torch
 import transformers
 # from peft import PeftModel
 
-from models.util import get_quantization_config
+from util import get_quantization_config
 
 logging.basicConfig(level=logging.INFO)
 
@@ -26,13 +26,11 @@ class ModelInference:
         # logging.info('Creating PEFT model...')
         # self.ft_model = PeftModel.from_pretrained(self.base_model, checkpoint_path).eval()
 
-    def generate_response(self, prompt: str, max_tokens: int = 50) -> str:
+    def generate_response(self, prompt: str, max_tokens: int = 50, **kwargs) -> str:
         inputs = self.prepare_prompt(prompt)
         with torch.no_grad():
-            logging.info('Generating up to %d tokens...', max_tokens)
-            outputs = self.base_model.generate(**inputs, max_length=max_tokens, pad_token_id=2)
+            outputs = self.base_model.generate(**inputs, max_length=max_tokens, pad_token_id=2, **kwargs)
             # outputs = self.ft_model.generate(**inputs, max_length=max_tokens, pad_token_id=2)
-        logging.info('Decoding...')
         return self.postprocess(self.tokenizer.decode(outputs[0], skip_special_tokens=True))
 
     def prepare_prompt(self, prompt):
